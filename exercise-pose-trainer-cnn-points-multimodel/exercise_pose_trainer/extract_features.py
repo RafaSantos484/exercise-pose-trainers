@@ -20,9 +20,6 @@ pose_model = vision.PoseLandmarker.create_from_options(
 )
 
 
-CLASSES = ["arms", "legs"]
-
-
 class Point3d:
     def __init__(self, x: float, y: float, z: float):
         self.x = x
@@ -199,46 +196,28 @@ def get_angle_from_joints_triplet(landmarks, triplet, degrees=False, normalize=T
     return angle
 
 
-def extract_features_arms(landmarks):
+def extract_features(landmarks, joints):
     # system = canonical_system
     system = get_custom_system(landmarks)
 
-    joints = ["LEFT_WRIST", "RIGHT_WRIST", "LEFT_ELBOW",
-              "RIGHT_ELBOW", "LEFT_SHOULDER", "RIGHT_SHOULDER"]
     points = [system.to_local(Point3d.from_landmark(
         landmarks[PoseLandmark[joint]])).to_list() for joint in joints]
     return points
-
-
-def extract_features_legs(landmarks):
-    # system = canonical_system
-    system = get_custom_system(landmarks)
-
-    joints = ["LEFT_SHOULDER", "RIGHT_SHOULDER", "LEFT_HIP", "RIGHT_HIP",
-              "LEFT_KNEE", "RIGHT_KNEE", "LEFT_ANKLE", "RIGHT_ANKLE"]
-    points = [system.to_local(Point3d.from_landmark(
-        landmarks[PoseLandmark[joint]])).to_list() for joint in joints]
-    return points
-
-
-def extract_features(landmarks, cls: str):
-    extractors_dict = {
-        "arms": extract_features_arms,
-        "legs": extract_features_legs
-    }
-    return extractors_dict[cls](landmarks)
 
 
 def load_features(base_path: str):
     with open(os.path.join(base_path, "labels.json"), "r") as f:
-        imgs_labels = json.load(f)
+        labels_dict = json.load(f)
 
+    classes_points = labels_dict["classes_points"]
+    classes = list(classes_points.keys())
     features = {}
     labels = {}
-    for c in CLASSES:
+    for c in classes:
         features[c] = []
         labels[c] = []
 
+    imgs_labels = labels_dict["labels"]
     imgs_path = os.path.join(base_path, "images")
     for img_file in os.listdir(imgs_path):
         if not is_img_file(img_file):
@@ -258,12 +237,14 @@ def load_features(base_path: str):
 
         for landmark in landmarks:
             if landmark:
-                for c in CLASSES:
+                for c in classes:
                     if len(img_labels) == 0:
-                        features[c].append(extract_features(landmark, c))
+                        features[c].append(extract_features(
+                            landmark, classes_points[c]))
                         labels[c].append("correct")
                     elif c in img_labels:
-                        features[c].append(extract_features(landmark, c))
+                        features[c].append(extract_features(
+                            landmark, classes_points[c]))
                         labels[c].append("incorrect")
 
-    return features, labels
+    return features, labels, classes_points

@@ -39,13 +39,13 @@ def get_model(input_shape, num_classes):
     return model
 
 
-def plot_history(history, y_true, y_pred, classes):
+def plot_history(model_name: str, history, confusion_matrix, classes):
     # Accuracy
     plt.figure()
     plt.plot(history.history['categorical_accuracy'], label='Train Accuracy')
     plt.plot(history.history['val_categorical_accuracy'],
              label='Validation Accuracy')
-    plt.title('Model Accuracy')
+    plt.title(f'{model_name} Model Accuracy')
     plt.xlabel('Epoch')
     plt.ylabel('Accuracy')
     plt.legend()
@@ -54,19 +54,19 @@ def plot_history(history, y_true, y_pred, classes):
     plt.figure()
     plt.plot(history.history['loss'], label='Train Loss')
     plt.plot(history.history['val_loss'], label='Validation Loss')
-    plt.title('Model Loss')
+    plt.title(f'{model_name} Model Loss')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.legend()
 
     # Confusion Matrix
-    cm = confusion_matrix(y_true, y_pred)
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
+    disp = ConfusionMatrixDisplay(
+        confusion_matrix=confusion_matrix, display_labels=classes)
     disp.plot(colorbar=False)
-    disp.ax_.set_title("CNN Confusion Matrix")
+    disp.ax_.set_title(f"{model_name} Confusion Matrix")
 
-    plt.tight_layout()
-    plt.show()
+    # plt.tight_layout()
+    # plt.show()
 
 
 def report_model():
@@ -75,13 +75,16 @@ def report_model():
     args = parser.parse_args()
 
     with open(args.model_path, "rb") as f:
-        model_dict = pickle.load(f)
+        models_dict = pickle.load(f)
 
-    print(model_dict["classification_report"])
-    disp = ConfusionMatrixDisplay(
-        confusion_matrix=model_dict["confusion_matrix"], display_labels=model_dict["classes"])
-    disp.plot(colorbar=False)
-    disp.ax_.set_title("CNN Confusion Matrix")
-
+    classes = models_dict["classes"]
+    y_classes = models_dict["label_encoder"].classes_
+    for c in classes:
+        num_epochs = len(models_dict["models"][c]["history"].history["loss"])
+        print(
+            f"Classification Report for {c} model after {num_epochs} epochs (Test Set):")
+        print(models_dict["models"][c]["report"])
+        plot_history(c, models_dict["models"][c]["history"],
+                     models_dict["models"][c]["confusion_matrix"], y_classes)
     plt.tight_layout()
     plt.show()

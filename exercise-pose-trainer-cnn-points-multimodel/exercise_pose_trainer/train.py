@@ -1,6 +1,7 @@
 import argparse
 import pickle
 
+from matplotlib import pyplot as plt
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -11,7 +12,7 @@ from keras.callbacks import EarlyStopping
 from keras.utils import to_categorical
 
 from .model import get_model, plot_history
-from .extract_features import CLASSES, load_features
+from .extract_features import load_features
 from .utils import get_basename
 
 
@@ -28,19 +29,20 @@ def main():
     seed = args.seed
 
     print("Loading features...")
-    X_classes, y_classes = load_features(base_path)
+    X_classes, y_classes, classes_points = load_features(base_path)
     print("Loaded features")
 
     label_encoder = None
-    models_dict = {"models": {}}
-    for c in CLASSES:
+    models_dict = {"models": {}, "classes_points": classes_points, "label_encoder": None}
+    classes = list(classes_points.keys())
+    for c in classes:
         X = np.array(X_classes[c])
         y = np.array(y_classes[c])
 
         if not label_encoder:
             label_encoder = LabelEncoder()
             label_encoder.fit(y)
-            models_dict["label_encoder"] = label_encoder  # type: ignore
+            models_dict["label_encoder"] = label_encoder
 
         y_encoded = label_encoder.transform(y)
         num_classes = len(label_encoder.classes_)
@@ -56,23 +58,18 @@ def main():
         early_stopping_callback = EarlyStopping(
             patience=100, restore_best_weights=True)
         history = model.fit(X_train, y_train,
-                            epochs=5000,
+                            epochs=10000,
                             # epochs=100,
                             validation_data=(X_test, y_test),
                             callbacks=[early_stopping_callback],
                             verbose=1)  # type: ignore
 
-        print(
-            f"Finished training {c} model after {len(history.history['loss'])} epochs")  # type: ignore
-
         y_pred = model.predict(X_test, verbose=0)  # type: ignore
         y_test_labels = np.argmax(y_test, axis=1)
         y_pred_labels = np.argmax(y_pred, axis=1)
 
-        # print("Classification Report (Test Set):")
         report = classification_report(
             y_test_labels, y_pred_labels, target_names=label_encoder.classes_, digits=4)
-        # print(report)
         cm = confusion_matrix(y_test_labels, y_pred_labels)
         models_dict["models"][c] = {
             "model_json": model.to_json(),
@@ -82,9 +79,18 @@ def main():
             "history": history
         }
 
-    for c in CLASSES:
-        print(f"Classification Report for {c} model (Test Set):")
+    for c in classes:
+        num_epochs = len(models_dict["models"][c]["history"].history["loss"])
+        print(
+            f"Classification Report for {c} model after {num_epochs} epochs (Test Set):")
         print(models_dict["models"][c]["report"])
+
+    if args.plot:
+        for c in classes:
+            plot_history(c, models_dict["models"][c]["history"],
+                         models_dict["models"][c]["confusion_matrix"], classes)
+        plt.tight_layout()
+        plt.show()
 
     model_name = get_basename(base_path)
     with open(f"{model_name}_model.pkl", "wb") as f:
