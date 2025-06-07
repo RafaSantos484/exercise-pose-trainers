@@ -4,7 +4,7 @@ from keras.models import Sequential
 from keras.layers import Conv1D, Input, Dense, Dropout, BatchNormalization, GlobalAveragePooling1D
 from keras.regularizers import l2
 from keras.optimizers import Adam
-from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
+from sklearn.metrics import ConfusionMatrixDisplay
 from matplotlib import pyplot as plt
 
 
@@ -12,7 +12,7 @@ def get_model(input_shape, num_classes):
     model = Sequential([
         Input(shape=input_shape),
 
-        Conv1D(32, kernel_size=3, padding='same',
+        Conv1D(32, kernel_size=4, padding='same',
                activation='relu', kernel_regularizer=l2(1e-4)),
         BatchNormalization(),
 
