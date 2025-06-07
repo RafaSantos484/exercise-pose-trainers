@@ -12,23 +12,33 @@ def get_model(input_shape, num_classes):
     model = Sequential([
         Input(shape=input_shape),
 
-        Conv1D(64, kernel_size=3, padding='same', activation='relu'),
+        Conv1D(32, kernel_size=3, padding='same',
+               activation='relu', kernel_regularizer=l2(1e-4)),
         BatchNormalization(),
 
-        Conv1D(128, kernel_size=3, padding='same', activation='relu'),
+        Conv1D(64, kernel_size=3, padding='same',
+               activation='relu', kernel_regularizer=l2(1e-4)),
         BatchNormalization(),
 
-        Conv1D(256, kernel_size=3, padding='same', activation='relu'),
+        Conv1D(128, kernel_size=3, padding='same',
+               activation='relu', kernel_regularizer=l2(1e-4)),
         BatchNormalization(),
 
         GlobalAveragePooling1D(),
-        Dropout(0.5),
+        Dropout(0.3),
 
-        Dense(128, activation='relu'),
-        Dropout(0.5),
+        Dense(64, activation='relu', kernel_regularizer=l2(1e-4)),
+        BatchNormalization(),
+        Dropout(0.3),
 
         Dense(num_classes, activation='softmax' if num_classes > 2 else 'sigmoid')
     ])
+
+    model.compile(
+        optimizer=Adam(learning_rate=1e-4),
+        loss='categorical_crossentropy' if num_classes > 2 else 'binary_crossentropy',
+        metrics=['categorical_accuracy']
+    )
 
     model.compile(
         optimizer=Adam(learning_rate=1e-4),
