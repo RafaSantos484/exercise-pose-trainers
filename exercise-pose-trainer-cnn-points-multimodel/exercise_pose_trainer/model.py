@@ -1,73 +1,39 @@
 import argparse
 import pickle
 from keras.models import Sequential
-from keras.layers import Conv1D, GlobalAveragePooling1D, Dense, Dropout, SpatialDropout1D, BatchNormalization, ReLU
+from keras.layers import Conv1D, Input, Dense, Dropout, BatchNormalization, GlobalAveragePooling1D
+from keras.regularizers import l2
 from keras.optimizers import Adam
-from keras.losses import CategoricalCrossentropy
-from keras.metrics import CategoricalAccuracy
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 from matplotlib import pyplot as plt
 
 
 def get_model(input_shape, num_classes):
-    model = Sequential()
+    model = Sequential([
+        Input(shape=input_shape),
 
-    # Bloco 1
-    model.add(Conv1D(64, 3, padding="same", input_shape=input_shape))
-    model.add(BatchNormalization())
-    model.add(ReLU())
-    model.add(SpatialDropout1D(0.3))
+        Conv1D(64, kernel_size=3, padding='same', activation='relu'),
+        BatchNormalization(),
 
-    # Bloco 2
-    model.add(Conv1D(128, 3, padding="same"))
-    model.add(BatchNormalization())
-    model.add(ReLU())
-    model.add(SpatialDropout1D(0.3))
+        Conv1D(128, kernel_size=3, padding='same', activation='relu'),
+        BatchNormalization(),
 
-    # Bloco 3
-    model.add(Conv1D(256, 3, padding="same"))
-    model.add(BatchNormalization())
-    model.add(ReLU())
-    model.add(SpatialDropout1D(0.3))
+        Conv1D(256, kernel_size=3, padding='same', activation='relu'),
+        BatchNormalization(),
 
-    # Bloco 4
-    model.add(Conv1D(512, 3, padding="same"))
-    model.add(BatchNormalization())
-    model.add(ReLU())
-    model.add(SpatialDropout1D(0.3))
+        GlobalAveragePooling1D(),
+        Dropout(0.5),
 
-    # Bottleneck com convolução 1x1
-    model.add(Conv1D(128, 1, padding="same"))
-    model.add(BatchNormalization())
-    model.add(ReLU())
+        Dense(128, activation='relu'),
+        Dropout(0.5),
 
-    # Bloco extra 5 (com residual simplificado)
-    model.add(Conv1D(128, 3, padding="same"))
-    model.add(BatchNormalization())
-    model.add(ReLU())
-    model.add(SpatialDropout1D(0.3))
+        Dense(num_classes, activation='softmax' if num_classes > 2 else 'sigmoid')
+    ])
 
-    # Pooling global
-    model.add(GlobalAveragePooling1D())
-
-    # Camadas densas mais robustas
-    model.add(Dense(256, activation="relu"))
-    model.add(Dropout(0.5))
-
-    model.add(Dense(128, activation="relu"))
-    model.add(Dropout(0.3))
-
-    model.add(Dense(64, activation="relu"))
-    model.add(Dropout(0.2))
-
-    # Saída
-    model.add(Dense(num_classes, activation="softmax"))
-
-    # Compilação
     model.compile(
-        optimizer=Adam(learning_rate=0.0001),
-        loss=CategoricalCrossentropy(),
-        metrics=[CategoricalAccuracy()]
+        optimizer=Adam(learning_rate=1e-4),
+        loss='categorical_crossentropy' if num_classes > 2 else 'binary_crossentropy',
+        metrics=['categorical_accuracy']
     )
 
     return model
