@@ -40,12 +40,6 @@ def get_model(input_shape, num_classes):
         metrics=['categorical_accuracy']
     )
 
-    model.compile(
-        optimizer=Adam(learning_rate=1e-4),
-        loss='categorical_crossentropy' if num_classes > 2 else 'binary_crossentropy',
-        metrics=['categorical_accuracy']
-    )
-
     return model
 
 

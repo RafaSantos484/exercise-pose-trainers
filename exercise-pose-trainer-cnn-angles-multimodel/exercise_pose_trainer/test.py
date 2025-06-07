@@ -5,7 +5,7 @@ import numpy as np
 from keras.models import model_from_json
 
 from .utils import get_basename, is_img_file
-from .extract_features import CLASSES, extract_features, get_landmarks
+from .extract_features import extract_features, get_landmarks
 
 
 def main():
@@ -22,9 +22,11 @@ def main():
     test_path = args.test_path
     img_paths = [path for path in os.listdir(test_path) if is_img_file(path)]
 
+    classes_points = models_dict["classes_points"]
+    classes = list(classes_points.keys())
     X = {}
     preds = {}
-    for c in CLASSES:
+    for c in classes:
         X[c] = []
         preds[c] = []
 
@@ -32,13 +34,13 @@ def main():
     for img_path in img_paths:
         landmarks = get_landmarks(os.path.join(test_path, img_path))
         if landmarks:
-            for c in CLASSES:
-                X[c].append(extract_features(landmarks, c))
+            for c in classes:
+                X[c].append(extract_features(landmarks, classes_points[c]))
             landmarked_img_paths.append(img_path)
     img_paths = landmarked_img_paths
 
     label_encoder = models_dict["label_encoder"]
-    for c in CLASSES:
+    for c in classes:
         model_json = models_dict["models"][c]["model_json"]
         weights = models_dict["models"][c]["model_weights"]
 
@@ -52,7 +54,7 @@ def main():
     print("model predictions:")
     for i, img in enumerate(img_paths):
         models_preds = ""
-        for c in CLASSES:
+        for c in classes:
             models_preds += f"{c}: {preds[c][i]}, "
         models_preds = models_preds[:-2]
         print(f"{img}: {models_preds}")

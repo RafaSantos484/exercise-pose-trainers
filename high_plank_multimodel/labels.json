@@ -14,7 +14,9 @@
       "LEFT_HIP",
       "RIGHT_HIP",
       "LEFT_KNEE",
-      "RIGHT_KNEE"
+      "RIGHT_KNEE",
+      "LEFT_ANKLE",
+      "RIGHT_ANKLE"
     ]
   },
   "labels": {

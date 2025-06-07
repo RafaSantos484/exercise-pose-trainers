@@ -1,3 +1,4 @@
+from itertools import combinations
 import json
 import math
 import os
@@ -18,9 +19,6 @@ pose_model = vision.PoseLandmarker.create_from_options(
         running_mode=vision.RunningMode.IMAGE,
     )
 )
-
-
-CLASSES = ["misaligned_arms", "misaligned_legs"]
 
 
 class Point3d:
@@ -133,160 +131,26 @@ def get_angle_from_joints_triplet(landmarks, triplet, degrees=False, normalize=T
     return angle
 
 
-"""
-def extract_features(landmarks):
-    sides_triplets = [
-        [["LEFT_WRIST", "LEFT_ELBOW", "LEFT_SHOULDER"],
-         ["RIGHT_WRIST", "RIGHT_ELBOW", "RIGHT_SHOULDER"],],
-
-        [["LEFT_WRIST", "LEFT_ELBOW", "RIGHT_ELBOW"],
-         ["RIGHT_WRIST", "RIGHT_ELBOW", "LEFT_ELBOW"],],
-
-        [["LEFT_WRIST", "LEFT_SHOULDER", "RIGHT_SHOULDER"],
-         ["RIGHT_WRIST", "RIGHT_SHOULDER", "LEFT_SHOULDER"],],
-
-        [["LEFT_ELBOW", "LEFT_SHOULDER", "RIGHT_SHOULDER"],
-         ["RIGHT_ELBOW", "RIGHT_SHOULDER", "LEFT_SHOULDER"],],
-
-        [["LEFT_WRIST", "LEFT_SHOULDER", "LEFT_HIP"],
-         ["RIGHT_WRIST", "RIGHT_SHOULDER", "RIGHT_HIP"],],
-
-        [["LEFT_WRIST", "LEFT_SHOULDER", "LEFT_KNEE"],
-         ["RIGHT_WRIST", "RIGHT_SHOULDER", "RIGHT_KNEE"],],
-
-        [["LEFT_WRIST", "LEFT_SHOULDER", "LEFT_ANKLE"],
-         ["RIGHT_WRIST", "RIGHT_SHOULDER", "RIGHT_ANKLE"],],
-
-        [["LEFT_SHOULDER", "LEFT_HIP", "LEFT_KNEE"],
-         ["RIGHT_SHOULDER", "RIGHT_HIP", "RIGHT_KNEE"],],
-
-        [["LEFT_SHOULDER", "LEFT_KNEE", "LEFT_ANKLE"],
-         ["RIGHT_SHOULDER", "RIGHT_KNEE", "RIGHT_ANKLE"],],
-
-        [["LEFT_HIP", "LEFT_KNEE", "LEFT_ANKLE"],
-         ["RIGHT_HIP", "RIGHT_KNEE", "RIGHT_ANKLE"],],
-
-        [["LEFT_ANKLE", "LEFT_SHOULDER", "RIGHT_SHOULDER"],
-         ["RIGHT_ANKLE", "RIGHT_SHOULDER", "LEFT_SHOULDER"],],
-
-        [["LEFT_ANKLE", "LEFT_HIP", "RIGHT_HIP"],
-         ["RIGHT_ANKLE", "RIGHT_HIP", "LEFT_HIP"],],
-
-        [["LEFT_ANKLE", "LEFT_KNEE", "RIGHT_KNEE"],
-         ["RIGHT_ANKLE", "RIGHT_KNEE", "LEFT_KNEE"],],
-    ]
-
-    features = []
-    for left_side_triplet, right_side_triplet in sides_triplets:
-        left_angle = get_angle_from_joints_triplet(
-            landmarks, left_side_triplet)
-        right_angle = get_angle_from_joints_triplet(
-            landmarks, right_side_triplet)
-        diff = left_angle - right_angle
-        features.append([left_angle, right_angle, diff])
-
-    return features
-"""
-
-
-def extract_features_arms(landmarks):
-    sides_triplets = [
-        [["LEFT_WRIST", "LEFT_ELBOW", "LEFT_SHOULDER"],
-         ["RIGHT_WRIST", "RIGHT_ELBOW", "RIGHT_SHOULDER"],],
-
-        [["LEFT_WRIST", "LEFT_ELBOW", "RIGHT_ELBOW"],
-         ["RIGHT_WRIST", "RIGHT_ELBOW", "LEFT_ELBOW"],],
-
-        [["LEFT_WRIST", "LEFT_SHOULDER", "RIGHT_SHOULDER"],
-         ["RIGHT_WRIST", "RIGHT_SHOULDER", "LEFT_SHOULDER"],],
-
-        [["LEFT_ELBOW", "LEFT_SHOULDER", "RIGHT_SHOULDER"],
-         ["RIGHT_ELBOW", "RIGHT_SHOULDER", "LEFT_SHOULDER"],],
-
-        [["LEFT_ELBOW", "LEFT_SHOULDER", "LEFT_HIP"],
-         ["RIGHT_ELBOW", "RIGHT_SHOULDER", "RIGHT_HIP"],],
-
-        [["LEFT_WRIST", "LEFT_SHOULDER", "LEFT_HIP"],
-         ["RIGHT_WRIST", "RIGHT_SHOULDER", "RIGHT_HIP"],],
-
-        [["LEFT_FOOT_INDEX", "LEFT_WRIST", "LEFT_ELBOW"],
-         ["RIGHT_FOOT_INDEX", "RIGHT_WRIST", "RIGHT_ELBOW"],],
-
-        [["LEFT_FOOT_INDEX", "LEFT_WRIST", "LEFT_SHOULDER"],
-         ["RIGHT_FOOT_INDEX", "RIGHT_WRIST", "RIGHT_SHOULDER"],],
-    ]
-
-    features = []
-    for left_side_triplet, right_side_triplet in sides_triplets:
-        left_angle = get_angle_from_joints_triplet(
-            landmarks, left_side_triplet)
-        right_angle = get_angle_from_joints_triplet(
-            landmarks, right_side_triplet)
-        diff = left_angle - right_angle
-        features.append([left_angle, right_angle, diff])
-
-    return features
-
-
-def extract_features_legs(landmarks):
-    sides_triplets = [
-        [["LEFT_WRIST", "LEFT_SHOULDER", "LEFT_HIP"],
-         ["RIGHT_WRIST", "RIGHT_SHOULDER", "RIGHT_HIP"],],
-
-        [["LEFT_WRIST", "LEFT_SHOULDER", "LEFT_KNEE"],
-         ["RIGHT_WRIST", "RIGHT_SHOULDER", "RIGHT_KNEE"],],
-
-        [["LEFT_WRIST", "LEFT_SHOULDER", "LEFT_ANKLE"],
-         ["RIGHT_WRIST", "RIGHT_SHOULDER", "RIGHT_ANKLE"],],
-
-        [["LEFT_SHOULDER", "LEFT_HIP", "LEFT_KNEE"],
-         ["RIGHT_SHOULDER", "RIGHT_HIP", "RIGHT_KNEE"],],
-
-        [["LEFT_SHOULDER", "LEFT_KNEE", "LEFT_ANKLE"],
-         ["RIGHT_SHOULDER", "RIGHT_KNEE", "RIGHT_ANKLE"],],
-
-        [["LEFT_HIP", "LEFT_KNEE", "LEFT_ANKLE"],
-         ["RIGHT_HIP", "RIGHT_KNEE", "RIGHT_ANKLE"],],
-
-        [["LEFT_ANKLE", "LEFT_SHOULDER", "RIGHT_SHOULDER"],
-         ["RIGHT_ANKLE", "RIGHT_SHOULDER", "LEFT_SHOULDER"],],
-
-        [["LEFT_ANKLE", "LEFT_HIP", "RIGHT_HIP"],
-         ["RIGHT_ANKLE", "RIGHT_HIP", "LEFT_HIP"],],
-
-        [["LEFT_ANKLE", "LEFT_KNEE", "RIGHT_KNEE"],
-         ["RIGHT_ANKLE", "RIGHT_KNEE", "LEFT_KNEE"],],
-    ]
-
-    features = []
-    for left_side_triplet, right_side_triplet in sides_triplets:
-        left_angle = get_angle_from_joints_triplet(
-            landmarks, left_side_triplet)
-        right_angle = get_angle_from_joints_triplet(
-            landmarks, right_side_triplet)
-        diff = left_angle - right_angle
-        features.append([left_angle, right_angle, diff])
-
-    return features
-
-
-def extract_features(landmarks, cls: str):
-    if cls == "misaligned_arms":
-        return extract_features_arms(landmarks)
-    elif cls == "misaligned_legs":
-        return extract_features_legs(landmarks)
+def extract_features(landmarks, joints: list[str]):
+    angles = []
+    for triplet in combinations(joints, 3):
+        angles.append(get_angle_from_joints_triplet(landmarks, triplet))
+    return angles
 
 
 def load_features(base_path: str):
     with open(os.path.join(base_path, "labels.json"), "r") as f:
-        imgs_labels = json.load(f)
+        labels_dict = json.load(f)
 
+    classes_points = labels_dict["classes_points"]
+    classes = list(classes_points.keys())
     features = {}
     labels = {}
-    for c in CLASSES:
+    for c in classes:
         features[c] = []
         labels[c] = []
 
+    imgs_labels = labels_dict["labels"]
     imgs_path = os.path.join(base_path, "images")
     for img_file in os.listdir(imgs_path):
         if not is_img_file(img_file):
@@ -306,12 +170,14 @@ def load_features(base_path: str):
 
         for landmark in landmarks:
             if landmark:
-                for c in CLASSES:
-                    if c in img_labels:
-                        features[c].append(extract_features(landmark, c))
-                        labels[c].append("incorrect")
-                    elif len(img_labels) == 0:
-                        features[c].append(extract_features(landmark, c))
+                for c in classes:
+                    if len(img_labels) == 0:
+                        features[c].append(extract_features(
+                            landmark, classes_points[c]))
                         labels[c].append("correct")
+                    elif c in img_labels:
+                        features[c].append(extract_features(
+                            landmark, classes_points[c]))
+                        labels[c].append("incorrect")
 
-    return features, labels
+    return features, labels, classes_points
