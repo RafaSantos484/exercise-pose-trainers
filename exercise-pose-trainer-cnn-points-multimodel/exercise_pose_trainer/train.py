@@ -54,7 +54,7 @@ def main():
         model = get_model(input_shape, num_classes)
         print(f"Training {c} model...")
         early_stopping_callback = EarlyStopping(
-            patience=200, restore_best_weights=True)
+            patience=100, restore_best_weights=True)
         history = model.fit(X_train, y_train,
                             epochs=5000,
                             # epochs=100,
