@@ -92,7 +92,7 @@ def main():
     if args.plot:
         for c in classes:
             plot_history(c, models_dict["models"][c]["history"],
-                         models_dict["models"][c]["confusion_matrix"], classes)
+                         models_dict["models"][c]["confusion_matrix"], label_encoder.classes_)  # type: ignore
         plt.tight_layout()
         plt.show()
 

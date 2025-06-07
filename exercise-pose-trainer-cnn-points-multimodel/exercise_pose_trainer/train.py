@@ -33,7 +33,8 @@ def main():
     print("Loaded features")
 
     label_encoder = None
-    models_dict = {"models": {}, "classes_points": classes_points, "label_encoder": None}
+    models_dict = {"models": {},
+                   "classes_points": classes_points, "label_encoder": None}
     classes = list(classes_points.keys())
     for c in classes:
         X = np.array(X_classes[c])
@@ -88,7 +89,7 @@ def main():
     if args.plot:
         for c in classes:
             plot_history(c, models_dict["models"][c]["history"],
-                         models_dict["models"][c]["confusion_matrix"], classes)
+                         models_dict["models"][c]["confusion_matrix"], label_encoder.classes_)  # type: ignore
         plt.tight_layout()
         plt.show()
 
