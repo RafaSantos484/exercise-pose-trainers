@@ -8,7 +8,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report, confusion_matrix
 
 
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.utils import to_categorical
 
 from .model import get_model, plot_history
@@ -57,12 +57,13 @@ def main():
         model = get_model(input_shape, num_classes)
         print(f"Training {c} model...")
         early_stopping_callback = EarlyStopping(
-            patience=50, restore_best_weights=True)
+            patience=500, restore_best_weights=True)
+        reduce_lr_callback = ReduceLROnPlateau(patience=100)
         history = model.fit(X_train, y_train,
                             epochs=5000,
                             # epochs=100,
                             validation_data=(X_test, y_test),
-                            callbacks=[early_stopping_callback],
+                            callbacks=[early_stopping_callback, reduce_lr_callback],
                             verbose=1)  # type: ignore
 
         print(

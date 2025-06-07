@@ -8,7 +8,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report, confusion_matrix
 
 
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.utils import to_categorical
 
 from .model import get_model, plot_history
@@ -57,12 +57,14 @@ def main():
         model = get_model(input_shape, num_classes)
         print(f"Training {c} model...")
         early_stopping_callback = EarlyStopping(
-            patience=100, restore_best_weights=True)
+            patience=500, restore_best_weights=True)
+        reduce_lr_callback = ReduceLROnPlateau(patience=100)
         history = model.fit(X_train, y_train,
                             epochs=10000,
                             # epochs=100,
                             validation_data=(X_test, y_test),
-                            callbacks=[early_stopping_callback],
+                            callbacks=[early_stopping_callback,
+                                       reduce_lr_callback],
                             verbose=1)  # type: ignore
 
         y_pred = model.predict(X_test, verbose=0)  # type: ignore
@@ -86,13 +88,13 @@ def main():
             f"Classification Report for {c} model after {num_epochs} epochs (Test Set):")
         print(models_dict["models"][c]["report"])
 
+    model_name = get_basename(base_path)
+    with open(f"{model_name}_model.pkl", "wb") as f:
+        pickle.dump(models_dict, f)
+
     if args.plot:
         for c in classes:
             plot_history(c, models_dict["models"][c]["history"],
                          models_dict["models"][c]["confusion_matrix"], label_encoder.classes_)  # type: ignore
         plt.tight_layout()
         plt.show()
-
-    model_name = get_basename(base_path)
-    with open(f"{model_name}_model.pkl", "wb") as f:
-        pickle.dump(models_dict, f)

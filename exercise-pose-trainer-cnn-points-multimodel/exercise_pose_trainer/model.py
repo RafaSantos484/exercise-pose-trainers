@@ -1,7 +1,7 @@
 import argparse
 import pickle
 from keras.models import Sequential
-from keras.layers import Flatten, Input, Dense, Dropout, BatchNormalization, GlobalAveragePooling1D
+from keras.layers import Flatten, Input, Dense, Dropout, BatchNormalization
 from keras.regularizers import l2
 from keras.optimizers import Adam
 from sklearn.metrics import ConfusionMatrixDisplay
@@ -13,11 +13,9 @@ def get_model(input_shape, num_classes):
         Input(shape=input_shape),
         Flatten(),
 
-        Dense(256, activation='relu', kernel_regularizer=l2(1e-4)),
-        BatchNormalization(),
-
         Dense(128, activation='relu', kernel_regularizer=l2(1e-4)),
         BatchNormalization(),
+        Dropout(0.2),
 
         Dense(64, activation='relu', kernel_regularizer=l2(1e-4)),
         BatchNormalization(),
@@ -77,7 +75,8 @@ def report_model():
     with open(args.model_path, "rb") as f:
         models_dict = pickle.load(f)
 
-    classes = models_dict["classes"]
+    classes_points = models_dict["classes_points"]
+    classes = list(classes_points.keys())
     y_classes = models_dict["label_encoder"].classes_
     for c in classes:
         num_epochs = len(models_dict["models"][c]["history"].history["loss"])

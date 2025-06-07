@@ -4,9 +4,7 @@ from keras.models import Sequential
 from keras.layers import Input, Flatten, Dense, Dropout, BatchNormalization
 from keras.regularizers import l2
 from keras.optimizers import Adam
-from keras.losses import CategoricalCrossentropy
-from keras.metrics import CategoricalAccuracy
-from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
+from sklearn.metrics import ConfusionMatrixDisplay
 from matplotlib import pyplot as plt
 
 
@@ -17,12 +15,13 @@ def get_model(input_shape, num_classes):
 
         Dense(128, activation='relu', kernel_regularizer=l2(1e-4)),
         BatchNormalization(),
+        Dropout(0.2),
 
         Dense(64, activation='relu', kernel_regularizer=l2(1e-4)),
         BatchNormalization(),
         Dropout(0.3),
 
-        Dense(64, activation='relu', kernel_regularizer=l2(1e-4)),
+        Dense(32, activation='relu', kernel_regularizer=l2(1e-4)),
         BatchNormalization(),
         Dropout(0.3),
 
@@ -76,7 +75,8 @@ def report_model():
     with open(args.model_path, "rb") as f:
         models_dict = pickle.load(f)
 
-    classes = models_dict["classes"]
+    classes_points = models_dict["classes_points"]
+    classes = list(classes_points.keys())
     y_classes = models_dict["label_encoder"].classes_
     for c in classes:
         num_epochs = len(models_dict["models"][c]["history"].history["loss"])
