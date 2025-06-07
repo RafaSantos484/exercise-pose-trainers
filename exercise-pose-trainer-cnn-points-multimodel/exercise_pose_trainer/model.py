@@ -1,7 +1,7 @@
 import argparse
 import pickle
 from keras.models import Sequential
-from keras.layers import Conv1D, Input, Dense, Dropout, BatchNormalization, GlobalAveragePooling1D
+from keras.layers import Flatten, Input, Dense, Dropout, BatchNormalization, GlobalAveragePooling1D
 from keras.regularizers import l2
 from keras.optimizers import Adam
 from sklearn.metrics import ConfusionMatrixDisplay
@@ -11,23 +11,19 @@ from matplotlib import pyplot as plt
 def get_model(input_shape, num_classes):
     model = Sequential([
         Input(shape=input_shape),
+        Flatten(),
 
-        Conv1D(32, kernel_size=4, padding='same',
-               activation='relu', kernel_regularizer=l2(1e-4)),
+        Dense(256, activation='relu', kernel_regularizer=l2(1e-4)),
         BatchNormalization(),
 
-        Conv1D(64, kernel_size=3, padding='same',
-               activation='relu', kernel_regularizer=l2(1e-4)),
+        Dense(128, activation='relu', kernel_regularizer=l2(1e-4)),
         BatchNormalization(),
-
-        Conv1D(128, kernel_size=3, padding='same',
-               activation='relu', kernel_regularizer=l2(1e-4)),
-        BatchNormalization(),
-
-        GlobalAveragePooling1D(),
-        Dropout(0.3),
 
         Dense(64, activation='relu', kernel_regularizer=l2(1e-4)),
+        BatchNormalization(),
+        Dropout(0.3),
+
+        Dense(32, activation='relu', kernel_regularizer=l2(1e-4)),
         BatchNormalization(),
         Dropout(0.3),
 

@@ -49,14 +49,14 @@ def main():
         y_categorical = to_categorical(y_encoded, num_classes=num_classes)
 
         X_train, X_test, y_train, y_test = train_test_split(
-            X, y_categorical, test_size=0.3, random_state=seed, stratify=y_encoded
+            X, y_categorical, test_size=0.2, random_state=seed, stratify=y_encoded
         )
 
         input_shape = X.shape[1:]
         model = get_model(input_shape, num_classes)
         print(f"Training {c} model...")
         early_stopping_callback = EarlyStopping(
-            patience=50, restore_best_weights=True)
+            patience=100, restore_best_weights=True)
         history = model.fit(X_train, y_train,
                             epochs=10000,
                             # epochs=100,
