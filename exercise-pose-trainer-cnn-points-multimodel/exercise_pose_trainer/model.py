@@ -75,8 +75,8 @@ def main():
     with open(args.model_path, "rb") as f:
         models_dict = pickle.load(f)
 
-    classes_points = models_dict["classes_points"]
-    classes = list(classes_points.keys())
+    classes_features = models_dict["classes_features"]
+    classes = list(classes_features.keys())
     y_classes = models_dict["label_encoder"].classes_
     for c in classes:
         num_epochs = len(models_dict["models"][c]["history"].history["loss"])

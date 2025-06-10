@@ -1,14 +1,14 @@
 import argparse
 import pickle
 from keras.models import Sequential
-from keras.layers import Input, Flatten, Dense, Dropout, BatchNormalization
+from keras.layers import Flatten, Input, Dense, Dropout, BatchNormalization
 from keras.regularizers import l2
 from keras.optimizers import Adam
 from sklearn.metrics import ConfusionMatrixDisplay
 from matplotlib import pyplot as plt
 
 
-def get_model(input_shape, num_classes):
+def get_model(input_shape, num_classes: int):
     model = Sequential([
         Input(shape=input_shape),
         Flatten(),
@@ -67,7 +67,7 @@ def plot_history(model_name: str, history, confusion_matrix, classes):
     # plt.show()
 
 
-def report_model():
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("model_path", type=str, help="Path to the model")
     args = parser.parse_args()
@@ -77,13 +77,12 @@ def report_model():
 
     classes_points = models_dict["classes_points"]
     classes = list(classes_points.keys())
-    y_classes = models_dict["label_encoder"].classes_
     for c in classes:
         num_epochs = len(models_dict["models"][c]["history"].history["loss"])
         print(
             f"Classification Report for {c} model after {num_epochs} epochs (Test Set):")
         print(models_dict["models"][c]["report"])
         plot_history(c, models_dict["models"][c]["history"],
-                     models_dict["models"][c]["confusion_matrix"], y_classes)
+                     models_dict["models"][c]["confusion_matrix"], ["incorrect", "correct"])
     plt.tight_layout()
     plt.show()

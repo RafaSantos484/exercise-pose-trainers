@@ -29,11 +29,11 @@ def main():
     seed = args.seed
 
     print("Loading features...")
-    X_classes, y_classes, classes_points = load_features(base_path)
+    X_classes, y_classes, classes_features = load_features(base_path)
     print("Loaded features")
 
-    models_dict = {"models": {}, "classes_points": classes_points}
-    classes = list(classes_points.keys())
+    models_dict = {"models": {}, "classes_features": classes_features}
+    classes = list(classes_features.keys())
     for c in classes:
         X = np.array(X_classes[c])
         y = np.array(y_classes[c])

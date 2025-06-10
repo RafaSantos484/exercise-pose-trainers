@@ -197,8 +197,8 @@ def get_angle_from_joints_triplet(landmarks, triplet, degrees=False, normalize=T
 
 
 def extract_features(landmarks, joints):
-    system = canonical_system
-    # system = get_custom_system(landmarks)
+    # system = canonical_system
+    system = get_custom_system(landmarks)
 
     points = [system.to_local(Point3d.from_landmark(
         landmarks[PoseLandmark[joint]])).to_list() for joint in joints]
@@ -209,9 +209,9 @@ def load_features(base_path: str):
     with open(os.path.join(base_path, "labels.json"), "r") as f:
         labels_dict = json.load(f)
 
-    classes_points = labels_dict["classes_points"]
+    classes_features = labels_dict["classes_features"]
 
-    classes = list(classes_points.keys())
+    classes = list(classes_features.keys())
     features = {}
     labels = {}
     for c in classes:
@@ -241,11 +241,11 @@ def load_features(base_path: str):
                 for c in classes:
                     if len(img_labels) == 0:
                         features[c].append(extract_features(
-                            landmark, classes_points[c]))
+                            landmark, classes_features[c]["points"]))
                         labels[c].append([0, 1])  # correct
                     elif c == "full_body" or c in img_labels:
                         features[c].append(extract_features(
-                            landmark, classes_points[c]))
+                            landmark, classes_features[c]["points"]))
                         labels[c].append([1, 0])  # incorrect
 
-    return features, labels, classes_points
+    return features, labels, classes_features

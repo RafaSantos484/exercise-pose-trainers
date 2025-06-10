@@ -37,6 +37,12 @@ class Point3d:
     def __sub__(self, other):
         return Point3d(self.x - other.x, self.y - other.y, self.z - other.z)
 
+    def __mul__(self, scalar: float):
+        return Point3d(self.x * scalar, self.y * scalar, self.z * scalar)
+
+    def __rmul__(self, scalar: float):
+        return self.__mul__(scalar)
+
     def __str__(self):
         return f"({self.x}, {self.y}, {self.z})"
 
@@ -73,6 +79,35 @@ class Point3d:
         return math.degrees(angle_rad)
 
 
+class CoordinateSystem3D:
+    def __init__(self, origin: Point3d, x_dir: Point3d, y_dir: Point3d):
+        self.origin = origin
+        self.x_axis = x_dir.normalize()
+        self.z_axis = self.x_axis.cross(y_dir).normalize()
+        self.y_axis = self.z_axis.cross(
+            self.x_axis).normalize()  # Re-orthogonalize y
+
+    def to_local(self, point: Point3d) -> Point3d:
+        # Vetor do ponto em relação à origem do sistema
+        relative = point - self.origin
+
+        # Projeção nos eixos do sistema local
+        x_local = relative.dot(self.x_axis)
+        y_local = relative.dot(self.y_axis)
+        z_local = relative.dot(self.z_axis)
+
+        return Point3d(x_local, y_local, z_local)
+
+    def to_global(self, point_local: Point3d) -> Point3d:
+        # Conversão do ponto local para coordenadas globais
+        global_vector = (
+            self.x_axis * point_local.x +
+            self.y_axis * point_local.y +
+            self.z_axis * point_local.z
+        )
+        return self.origin + global_vector
+
+
 def get_landmarks(image_path: str, mirror=False):
     image = cv2.imread(image_path)
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -89,6 +124,37 @@ def get_landmarks(image_path: str, mirror=False):
     landmarks = result.pose_world_landmarks[0]
 
     return landmarks
+
+
+canonical_system = CoordinateSystem3D(
+    Point3d(0, 0, 0), Point3d(1, 0, 0), Point3d(0, 1, 0))
+
+
+def get_custom_system(landmarks):
+    left_wrist_point = Point3d.from_landmark(
+        landmarks[PoseLandmark.LEFT_WRIST])
+    right_wrist_point = Point3d.from_landmark(
+        landmarks[PoseLandmark.RIGHT_WRIST])
+    wrist_mid_point = left_wrist_point.get_mid_point(right_wrist_point)
+
+    left_shoulder_point = Point3d.from_landmark(
+        landmarks[PoseLandmark.LEFT_SHOULDER])
+    right_shoulder_point = Point3d.from_landmark(
+        landmarks[PoseLandmark.RIGHT_SHOULDER])
+    shoulder_mid_point = left_shoulder_point.get_mid_point(
+        right_shoulder_point)
+
+    left_foot_index_point = Point3d.from_landmark(
+        landmarks[PoseLandmark.LEFT_FOOT_INDEX])
+    right_foot_index_point = Point3d.from_landmark(
+        landmarks[PoseLandmark.RIGHT_FOOT_INDEX])
+    foot_index_mid_point = left_foot_index_point.get_mid_point(
+        right_foot_index_point)
+
+    origin = foot_index_mid_point
+    x_dir = wrist_mid_point - foot_index_mid_point
+    y_dir = shoulder_mid_point - wrist_mid_point
+    return CoordinateSystem3D(origin, x_dir, y_dir)
 
 
 def invert_landmarks(landmarks):
@@ -114,7 +180,7 @@ def invert_landmarks(landmarks):
     return landmarks_inverted
 
 
-def get_angle_from_joints_triplet(landmarks, triplet, degrees=False, normalize=True):
+def get_feature_from_joints_triplet(landmarks, triplet, degrees=False, normalize=True):
     a = Point3d.from_landmark(landmarks[PoseLandmark[triplet[0]]])
     b = Point3d.from_landmark(landmarks[PoseLandmark[triplet[1]]])
     c = Point3d.from_landmark(landmarks[PoseLandmark[triplet[2]]])
@@ -131,10 +197,10 @@ def get_angle_from_joints_triplet(landmarks, triplet, degrees=False, normalize=T
     return angle
 
 
-def extract_features(landmarks, joints: list[str]):
+def extract_features(landmarks, triplets: list[list[str]]):
     angles = []
-    for triplet in combinations(joints, 3):
-        angles.append(get_angle_from_joints_triplet(landmarks, triplet))
+    for triplet in triplets:
+        angles.append(get_feature_from_joints_triplet(landmarks, triplet))
     return angles
 
 
@@ -142,14 +208,9 @@ def load_features(base_path: str):
     with open(os.path.join(base_path, "labels.json"), "r") as f:
         labels_dict = json.load(f)
 
-    classes_points = labels_dict["classes_points"]
-    full_body_points_set = set()
-    for points in classes_points.values():
-        full_body_points_set.update(points)
-    full_body_points = list(full_body_points_set)
-    classes_points["full_body"] = full_body_points
+    classes_features = labels_dict["classes_features"]
 
-    classes = list(classes_points.keys())
+    classes = list(classes_features.keys())
     features = {}
     labels = {}
     for c in classes:
@@ -179,11 +240,11 @@ def load_features(base_path: str):
                 for c in classes:
                     if len(img_labels) == 0:
                         features[c].append(extract_features(
-                            landmark, classes_points[c]))
-                        labels[c].append("correct")
+                            landmark, classes_features[c]["angles"]))
+                        labels[c].append([0, 1])  # correct
                     elif c == "full_body" or c in img_labels:
                         features[c].append(extract_features(
-                            landmark, classes_points[c]))
-                        labels[c].append("incorrect")
+                            landmark, classes_features[c]["angles"]))
+                        labels[c].append([1, 0])  # incorrect
 
-    return features, labels, classes_points
+    return features, labels, classes_features

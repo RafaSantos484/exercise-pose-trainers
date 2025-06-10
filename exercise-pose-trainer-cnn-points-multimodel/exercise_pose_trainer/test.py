@@ -22,8 +22,8 @@ def main():
     test_path = args.test_path
     img_paths = [path for path in os.listdir(test_path) if is_img_file(path)]
 
-    classes_points = models_dict["classes_points"]
-    classes = list(classes_points.keys())
+    classes_features = models_dict["classes_features"]
+    classes = list(classes_features.keys())
     X = {}
     preds = {}
     for c in classes:
@@ -35,7 +35,8 @@ def main():
         landmarks = get_landmarks(os.path.join(test_path, img_path))
         if landmarks:
             for c in classes:
-                X[c].append(extract_features(landmarks, classes_points[c]))
+                X[c].append(extract_features(
+                    landmarks, classes_features[c]["points"]))
             landmarked_img_paths.append(img_path)
     img_paths = landmarked_img_paths
 
