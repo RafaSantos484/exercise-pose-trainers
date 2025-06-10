@@ -8,7 +8,7 @@ from sklearn.metrics import ConfusionMatrixDisplay
 from matplotlib import pyplot as plt
 
 
-def get_model(input_shape, num_classes):
+def get_model(input_shape, num_classes: int):
     model = Sequential([
         Input(shape=input_shape),
         Flatten(),
@@ -67,7 +67,7 @@ def plot_history(model_name: str, history, confusion_matrix, classes):
     # plt.show()
 
 
-def report_model():
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("model_path", type=str, help="Path to the model")
     args = parser.parse_args()

@@ -5,19 +5,13 @@ description = ""
 authors = ["rafael.santos <rafaelsantos32141@gmail.com>"]
 readme = "README.md"
 
-[tool.poetry.dependencies]
-python = ">=3.10,<3.12"
-mediapipe = "^0.10.21"
-scikit-learn = "^1.6.1"
-tensorflow-io-gcs-filesystem = "0.31.0"
-tensorflow = "2.15.0"
-tensorflow-intel = {version="^2.15.0", platform = "win32"}
-
 [tool.poetry.scripts]
 train = "exercise_pose_trainer.train:main"
 rename_files = "exercise_pose_trainer.rename_files:main"
 test = "exercise_pose_trainer.test:main"
 report = "exercise_pose_trainer.model:report_model"
+pkl_to_h5 = "exercise_pose_trainer.pkl_to_h5:main"
+
 
 
 [build-system]

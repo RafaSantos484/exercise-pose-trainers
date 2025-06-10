@@ -39,7 +39,6 @@ def main():
             landmarked_img_paths.append(img_path)
     img_paths = landmarked_img_paths
 
-    label_encoder = models_dict["label_encoder"]
     for c in classes:
         model_json = models_dict["models"][c]["model_json"]
         weights = models_dict["models"][c]["model_weights"]
@@ -47,14 +46,14 @@ def main():
         model = model_from_json(model_json)
         model.set_weights(weights)  # type: ignore
 
-        pred_probs = model.predict(X[c], verbose=0)  # type: ignore
-        preds[c] = label_encoder.inverse_transform(
-            np.argmax(pred_probs, axis=1))
+        pred_probs = model.predict(np.array(X[c]), verbose=0)  # type: ignore
+        preds[c] = np.argmax(pred_probs, axis=1)
 
     print("model predictions:")
+    labels = ["incorrect", "correct"]
     for i, img in enumerate(img_paths):
         models_preds = ""
         for c in classes:
-            models_preds += f"{c}: {preds[c][i]}, "
+            models_preds += f"{c}: {labels[preds[c][i]]}, "
         models_preds = models_preds[:-2]
         print(f"{img}: {models_preds}")

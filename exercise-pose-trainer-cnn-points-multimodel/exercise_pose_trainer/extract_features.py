@@ -210,11 +210,6 @@ def load_features(base_path: str):
         labels_dict = json.load(f)
 
     classes_points = labels_dict["classes_points"]
-    full_body_points_set = set()
-    for points in classes_points.values():
-        full_body_points_set.update(points)
-    full_body_points = list(full_body_points_set)
-    classes_points["full_body"] = full_body_points
 
     classes = list(classes_points.keys())
     features = {}
@@ -247,10 +242,10 @@ def load_features(base_path: str):
                     if len(img_labels) == 0:
                         features[c].append(extract_features(
                             landmark, classes_points[c]))
-                        labels[c].append("correct")
+                        labels[c].append([0, 1])  # correct
                     elif c == "full_body" or c in img_labels:
                         features[c].append(extract_features(
                             landmark, classes_points[c]))
-                        labels[c].append("incorrect")
+                        labels[c].append([1, 0])  # incorrect
 
     return features, labels, classes_points

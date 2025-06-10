@@ -32,29 +32,16 @@ def main():
     X_classes, y_classes, classes_points = load_features(base_path)
     print("Loaded features")
 
-    label_encoder = None
-    models_dict = {"models": {},
-                   "classes_points": classes_points, "label_encoder": None}
+    models_dict = {"models": {}, "classes_points": classes_points}
     classes = list(classes_points.keys())
     for c in classes:
         X = np.array(X_classes[c])
         y = np.array(y_classes[c])
-
-        if not label_encoder:
-            label_encoder = LabelEncoder()
-            label_encoder.fit(y)
-            models_dict["label_encoder"] = label_encoder
-
-        y_encoded = label_encoder.transform(y)
-        num_classes = len(label_encoder.classes_)
-        y_categorical = to_categorical(y_encoded, num_classes=num_classes)
-
         X_train, X_test, y_train, y_test = train_test_split(
-            X, y_categorical, test_size=0.3, random_state=seed, stratify=y_encoded
-        )
+            X, y, test_size=0.3, random_state=seed)
 
         input_shape = X.shape[1:]
-        model = get_model(input_shape, num_classes)
+        model = get_model(input_shape, num_classes=2)
         print(f"Training {c} model...")
         early_stopping_callback = EarlyStopping(
             patience=500, restore_best_weights=True)
@@ -72,7 +59,7 @@ def main():
         y_pred_labels = np.argmax(y_pred, axis=1)
 
         report = classification_report(
-            y_test_labels, y_pred_labels, target_names=label_encoder.classes_, digits=4)
+            y_test_labels, y_pred_labels, target_names=["incorrect", "correct"], digits=4)
         cm = confusion_matrix(y_test_labels, y_pred_labels)
         models_dict["models"][c] = {
             "model_json": model.to_json(),
@@ -95,6 +82,6 @@ def main():
     if args.plot:
         for c in classes:
             plot_history(c, models_dict["models"][c]["history"],
-                         models_dict["models"][c]["confusion_matrix"], label_encoder.classes_)  # type: ignore
+                         models_dict["models"][c]["confusion_matrix"], ["incorrect", "correct"])  # type: ignore
         plt.tight_layout()
         plt.show()
