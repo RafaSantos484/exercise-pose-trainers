@@ -200,8 +200,23 @@ def extract_features(landmarks, joints):
     # system = canonical_system
     system = get_custom_system(landmarks)
 
-    points = [system.to_local(Point3d.from_landmark(
-        landmarks[PoseLandmark[joint]])).to_list() for joint in joints]
+    points = np.array([system.to_local(Point3d.from_landmark(
+        landmarks[PoseLandmark[joint]])).to_list() for joint in joints])
+
+    left_shoulder_point = Point3d.from_landmark(
+        landmarks[PoseLandmark.LEFT_SHOULDER])
+    right_shoulder_point = Point3d.from_landmark(
+        landmarks[PoseLandmark.RIGHT_SHOULDER])
+    shoulder_mid_point = left_shoulder_point.get_mid_point(
+        right_shoulder_point)
+    left_ankle_point = Point3d.from_landmark(
+        landmarks[PoseLandmark.LEFT_ANKLE])
+    right_ankle_point = Point3d.from_landmark(
+        landmarks[PoseLandmark.RIGHT_ANKLE])
+    ankle_mid_point = left_ankle_point.get_mid_point(right_ankle_point)
+    shoulder_ankle_vector = shoulder_mid_point - ankle_mid_point
+    points = points / shoulder_ankle_vector.norm()
+
     return points
 
 
