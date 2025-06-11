@@ -2,7 +2,6 @@ import argparse
 import pickle
 from keras.models import Sequential
 from keras.layers import Flatten, Input, Dense, Dropout, BatchNormalization
-from keras.regularizers import l2
 from keras.optimizers import Adam
 from sklearn.metrics import ConfusionMatrixDisplay
 from matplotlib import pyplot as plt
@@ -13,15 +12,15 @@ def get_model(input_shape, num_classes: int):
         Input(shape=input_shape),
         Flatten(),
 
-        Dense(128, activation='relu', kernel_regularizer=l2(1e-4)),
+        Dense(128, activation='relu'),
         BatchNormalization(),
         Dropout(0.2),
 
-        Dense(64, activation='relu', kernel_regularizer=l2(1e-4)),
+        Dense(64, activation='relu'),
         BatchNormalization(),
         Dropout(0.3),
 
-        Dense(32, activation='relu', kernel_regularizer=l2(1e-4)),
+        Dense(32, activation='relu'),
         BatchNormalization(),
         Dropout(0.3),
 
