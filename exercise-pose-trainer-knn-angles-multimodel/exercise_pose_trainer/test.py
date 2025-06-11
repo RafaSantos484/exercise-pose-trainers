@@ -45,7 +45,6 @@ def main():
         preds[c] = model.predict(np.array(X[c]))
 
     print("model predictions:")
-    labels = ["incorrect", "correct"]
     for i, img in enumerate(img_paths):
         models_preds = ""
         for c in classes:

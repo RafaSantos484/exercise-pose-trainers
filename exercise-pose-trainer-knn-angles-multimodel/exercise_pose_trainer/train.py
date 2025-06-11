@@ -5,7 +5,6 @@ from matplotlib import pyplot as plt
 import numpy as np
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report, confusion_matrix
 
 from .model import plot_history
@@ -50,11 +49,12 @@ def main():
         grid_search = GridSearchCV(model, param_grid, n_jobs=-1)
         grid_search.fit(X_train, y_train)
         best_model = grid_search.best_estimator_
+        model_classes = best_model.classes_
         params = grid_search.best_params_
 
         y_pred = best_model.predict(X_test)
-        report = classification_report(y_test, y_pred, target_names=[
-                                       "incorrect", "correct"], digits=4)
+        report = classification_report(
+            y_test, y_pred, target_names=model_classes, digits=4)
         cm = confusion_matrix(y_test, y_pred)
         models_dict["models"][c] = {
             "model": best_model,
@@ -75,6 +75,6 @@ def main():
         for c in classes:
             plot_history(c,
                          models_dict["models"][c]["confusion_matrix"],
-                         ["incorrect", "correct"])
+                         models_dict["models"][c]["model"].classes_)
         plt.tight_layout()
         plt.show()

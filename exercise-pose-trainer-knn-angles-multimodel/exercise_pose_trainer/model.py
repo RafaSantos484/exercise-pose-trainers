@@ -26,12 +26,13 @@ def main():
     classes_features = models_dict["classes_features"]
     classes = list(classes_features.keys())
     for c in classes:
+        model = models_dict["models"][c]["model"]
         print(
             f"Classification Report for {c} model (Test Set):")
         print(models_dict["models"][c]["report"])
         print(f"params: {models_dict['models'][c]['params']}\n")
         plot_history(c,
                      models_dict["models"][c]["confusion_matrix"],
-                     ["incorrect", "correct"])
+                     model.classes_)
     plt.tight_layout()
     plt.show()

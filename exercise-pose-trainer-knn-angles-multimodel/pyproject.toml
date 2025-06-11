@@ -15,6 +15,7 @@ train = "exercise_pose_trainer.train:main"
 rename_files = "exercise_pose_trainer.rename_files:main"
 test = "exercise_pose_trainer.test:main"
 report = "exercise_pose_trainer.model:main"
+pkl_to_json = "exercise_pose_trainer.pkl_to_json:main"
 
 [build-system]
 requires = ["poetry-core"]
