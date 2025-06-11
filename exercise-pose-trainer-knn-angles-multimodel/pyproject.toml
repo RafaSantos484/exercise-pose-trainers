@@ -14,7 +14,7 @@ scikit-learn = "^1.6.1"
 train = "exercise_pose_trainer.train:main"
 rename_files = "exercise_pose_trainer.rename_files:main"
 test = "exercise_pose_trainer.test:main"
-report = "exercise_pose_trainer.model:report_model"
+report = "exercise_pose_trainer.model:main"
 
 [build-system]
 requires = ["poetry-core"]
