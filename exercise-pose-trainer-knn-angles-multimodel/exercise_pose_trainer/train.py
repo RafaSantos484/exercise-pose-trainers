@@ -66,6 +66,7 @@ def main():
     for c in classes:
         print(f"Classification Report for {c} model(Test Set):")
         print(models_dict["models"][c]["report"])
+        print(f"params: {models_dict['models'][c]['params']}\n")
 
     model_name = get_basename(base_path)
     with open(f"{model_name}_model.pkl", "wb") as f:

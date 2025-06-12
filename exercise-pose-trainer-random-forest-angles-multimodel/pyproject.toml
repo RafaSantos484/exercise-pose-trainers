@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "exercise-pose-trainer"
+version = "0.1.0"
+description = ""
+authors = ["rafael.santos <rafaelsantos32141@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+mediapipe = "^0.10.21"
+scikit-learn = "^1.6.1"
+
+[tool.poetry.scripts]
+train = "exercise_pose_trainer.train:main"
+rename_files = "exercise_pose_trainer.rename_files:main"
+test = "exercise_pose_trainer.test:main"
+report = "exercise_pose_trainer.model:main"
+pkl_to_json = "exercise_pose_trainer.pkl_to_json:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
