@@ -188,8 +188,8 @@ def get_angle_from_joints_triplet(landmarks, triplet, degrees=False, normalize=T
 
 
 def extract_features(landmarks, joints):
-    system = canonical_system
-    # system = get_custom_system(landmarks)
+    # system = canonical_system
+    system = get_custom_system(landmarks)
 
     points = np.array([system.to_local(Point3d.from_landmark(
         landmarks[PoseLandmark[joint]])).to_list() for joint in joints])
