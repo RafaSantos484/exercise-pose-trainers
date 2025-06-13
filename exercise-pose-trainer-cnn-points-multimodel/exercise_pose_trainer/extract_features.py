@@ -81,30 +81,21 @@ class Point3d:
 class CoordinateSystem3D:
     def __init__(self, origin: Point3d, x_dir: Point3d, y_dir: Point3d):
         self.origin = origin
-        self.x_axis = x_dir.normalize()
-        self.z_axis = self.x_axis.cross(y_dir).normalize()
-        self.y_axis = self.z_axis.cross(
-            self.x_axis).normalize()  # Re-orthogonalize y
+
+        self.x_dir = x_dir
+        self.y_dir = y_dir
+        self.z_dir = self.x_dir.cross(self.y_dir)
 
     def to_local(self, point: Point3d) -> Point3d:
         # Vetor do ponto em relação à origem do sistema
         relative = point - self.origin
 
         # Projeção nos eixos do sistema local
-        x_local = relative.dot(self.x_axis)
-        y_local = relative.dot(self.y_axis)
-        z_local = relative.dot(self.z_axis)
+        x_local = relative.dot(self.x_dir.normalize())
+        y_local = relative.dot(self.y_dir.normalize())
+        z_local = relative.dot(self.z_dir.normalize())
 
         return Point3d(x_local, y_local, z_local)
-
-    def to_global(self, point_local: Point3d) -> Point3d:
-        # Conversão do ponto local para coordenadas globais
-        global_vector = (
-            self.x_axis * point_local.x +
-            self.y_axis * point_local.y +
-            self.z_axis * point_local.z
-        )
-        return self.origin + global_vector
 
 
 def get_landmarks(image_path: str, mirror=False):
@@ -197,11 +188,12 @@ def get_angle_from_joints_triplet(landmarks, triplet, degrees=False, normalize=T
 
 
 def extract_features(landmarks, joints):
-    # system = canonical_system
-    system = get_custom_system(landmarks)
+    system = canonical_system
+    # system = get_custom_system(landmarks)
 
     points = np.array([system.to_local(Point3d.from_landmark(
         landmarks[PoseLandmark[joint]])).to_list() for joint in joints])
+
     return points
 
 
