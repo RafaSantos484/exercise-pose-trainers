@@ -27,7 +27,7 @@ def main():
     X = {}
     preds = {}
     for c in classes:
-        X[c] = {"angles": [], "points": []}
+        X[c] = []
         preds[c] = []
 
     landmarked_img_paths = []
@@ -35,10 +35,7 @@ def main():
         landmarks = get_landmarks(os.path.join(test_path, img_path))
         if landmarks:
             for c in classes:
-                angles_feats, points_feats = extract_features(
-                    landmarks, classes_features[c]["points"], classes_features[c]["angles"])
-                X[c]["angles"].append(angles_feats)
-                X[c]["points"].append(points_feats)
+                X[c].append(extract_features(landmarks, classes_features[c]["points"]))
             landmarked_img_paths.append(img_path)
     img_paths = landmarked_img_paths
 
@@ -49,8 +46,7 @@ def main():
         model = model_from_json(model_json)
         model.set_weights(weights)  # type: ignore
 
-        pred_probs = model.predict(
-            [np.array(X[c]["angles"]), np.array(X[c]["points"])], verbose=0)  # type: ignore
+        pred_probs = model.predict(np.array(X[c]), verbose=0)  # type: ignore
         preds[c] = np.argmax(pred_probs, axis=1)
 
     print("model predictions:")

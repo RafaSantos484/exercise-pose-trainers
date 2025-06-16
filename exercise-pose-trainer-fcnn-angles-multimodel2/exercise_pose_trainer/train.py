@@ -35,46 +35,26 @@ def main():
     models_dict = {"models": {}, "classes_features": classes_features}
     classes = list(classes_features.keys())
     for c in classes:
-        X = X_classes[c]
+        X = np.array(X_classes[c])
         y = np.array(y_classes[c])
         X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.3, random_state=seed
-        )
+            X, y, test_size=0.3, random_state=seed)
 
-        angles_shape = X[0][0].shape
-        points_shape = X[0][1].shape
-        model = get_model(angles_shape, points_shape, num_classes=2)
-
-        X_train_angles = []
-        X_train_points = []
-        for x in X_train:
-            X_train_angles.append(x[0])
-            X_train_points.append(x[1])
-        X_train_angles = np.array(X_train_angles)
-        X_train_points = np.array(X_train_points)
-
-        X_test_angles = []
-        X_test_points = []
-        for x in X_test:
-            X_test_angles.append(x[0])
-            X_test_points.append(x[1])
-        X_test_angles = np.array(X_test_angles)
-        X_test_points = np.array(X_test_points)
-
+        input_shape = X.shape[1:]
+        model = get_model(input_shape, num_classes=2)
         print(f"Training {c} model...")
         early_stopping_callback = EarlyStopping(
             patience=500, restore_best_weights=True)
         reduce_lr_callback = ReduceLROnPlateau(patience=100)
-        history = model.fit([X_train_angles, X_train_points], y_train,
+        history = model.fit(X_train, y_train,
                             epochs=10000,
                             # epochs=100,
-                            validation_data=(
-                                [X_test_angles, X_test_points], y_test),
+                            validation_data=(X_test, y_test),
                             callbacks=[early_stopping_callback,
                                        reduce_lr_callback],
                             verbose=1)  # type: ignore
 
-        y_pred = model.predict([X_test_angles, X_test_points], verbose=0)  # type: ignore
+        y_pred = model.predict(X_test, verbose=0)  # type: ignore
         y_test_labels = np.argmax(y_test, axis=1)
         y_pred_labels = np.argmax(y_pred, axis=1)
 
