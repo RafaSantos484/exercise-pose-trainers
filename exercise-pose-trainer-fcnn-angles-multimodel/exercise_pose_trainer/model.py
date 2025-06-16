@@ -11,10 +11,6 @@ def get_model(input_shape, num_classes: int):
     model = Sequential([
         Input(shape=input_shape),
 
-        Dense(128, activation='relu'),
-        BatchNormalization(),
-        Dropout(0.2),
-
         Dense(64, activation='relu'),
         BatchNormalization(),
         Dropout(0.3),
