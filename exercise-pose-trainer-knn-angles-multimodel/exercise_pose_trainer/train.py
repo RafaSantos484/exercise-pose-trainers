@@ -41,7 +41,7 @@ def main():
         # For p=2, minkowski = euclidean
         param_grid = {
             "n_neighbors": list(range(1, 20, 2)),
-            "p": list(range(1, 11)),
+            "p": list(range(1, 21)),
             "weights": ["uniform", "distance"],
             "metric": ["minkowski"]
         }
