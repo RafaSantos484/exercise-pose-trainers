@@ -36,7 +36,7 @@ def main():
         if landmarks:
             for c in classes:
                 X[c].append(extract_features(
-                    landmarks, classes_features[c]["angles"]))
+                    landmarks, classes_features[c]["points"]))
             landmarked_img_paths.append(img_path)
     img_paths = landmarked_img_paths
 
