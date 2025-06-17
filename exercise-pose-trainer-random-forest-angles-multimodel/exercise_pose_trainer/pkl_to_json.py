@@ -1,7 +1,7 @@
 import argparse
 import pickle
 import json
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 
 def main():
@@ -16,14 +16,24 @@ def main():
     classes_features = models_dict["classes_features"]
     classes = list(classes_features.keys())
     for c in classes:
-        model: KNeighborsClassifier = models_dict["models"][c]["model"]
+        model: RandomForestClassifier = models_dict["models"][c]["model"]
         params = models_dict["models"][c]["params"]
+        forest_data = []
+        for estimator in model.estimators_:
+            tree = estimator.tree_
+            tree_data = {
+                "children_left": tree.children_left.tolist(),
+                "children_right": tree.children_right.tolist(),
+                "feature": tree.feature.tolist(),
+                "threshold": tree.threshold.tolist(),
+                "value": tree.value.squeeze().tolist()  # shape (n_nodes, n_classes)
+            }
+            forest_data.append(tree_data)
         # save as json
         model_dict = {
             "params": params,
             "classes": model.classes_.tolist(),
-            "X": model._fit_X.tolist(),
-            "y": model._y.tolist(),
+            "forest": forest_data
         }
         with open(f"{c}_model.json", "w") as f:
             json.dump(model_dict, f)
