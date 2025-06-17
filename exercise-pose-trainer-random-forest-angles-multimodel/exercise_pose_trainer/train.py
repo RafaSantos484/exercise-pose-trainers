@@ -38,9 +38,9 @@ def main():
 
         print(f"Training {c} model...")
         param_grid = {
-            "n_estimators": [10, 30, 50, 80, 100, 150, 200],
+            "n_estimators": [2, 5, 10, 30, 50, 80, 100],
             "criterion": ["gini", "entropy", "log_loss"],
-            "max_depth": [None, 10, 20, 30, 40],
+            "max_depth": [None, 20, 40, 60, 80],
             "min_samples_split": [2, 4, 6, 8],
             "min_samples_leaf": [1, 2, 3, 4],
             "bootstrap": [True, False]
