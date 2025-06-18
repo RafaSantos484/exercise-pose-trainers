@@ -157,29 +157,6 @@ def get_custom_system(landmarks):
     return CoordinateSystem3D(origin, x_dir, y_dir)
 
 
-def invert_landmarks(landmarks):
-    if landmarks is None:
-        return None
-
-    landmarks_inverted = {}
-    landmarks_inverted[PoseLandmark.LEFT_WRIST] = landmarks[PoseLandmark.RIGHT_WRIST]
-    landmarks_inverted[PoseLandmark.RIGHT_WRIST] = landmarks[PoseLandmark.LEFT_WRIST]
-    landmarks_inverted[PoseLandmark.LEFT_ELBOW] = landmarks[PoseLandmark.RIGHT_ELBOW]
-    landmarks_inverted[PoseLandmark.RIGHT_ELBOW] = landmarks[PoseLandmark.LEFT_ELBOW]
-    landmarks_inverted[PoseLandmark.LEFT_SHOULDER] = landmarks[PoseLandmark.RIGHT_SHOULDER]
-    landmarks_inverted[PoseLandmark.RIGHT_SHOULDER] = landmarks[PoseLandmark.LEFT_SHOULDER]
-    landmarks_inverted[PoseLandmark.LEFT_HIP] = landmarks[PoseLandmark.RIGHT_HIP]
-    landmarks_inverted[PoseLandmark.RIGHT_HIP] = landmarks[PoseLandmark.LEFT_HIP]
-    landmarks_inverted[PoseLandmark.LEFT_KNEE] = landmarks[PoseLandmark.RIGHT_KNEE]
-    landmarks_inverted[PoseLandmark.RIGHT_KNEE] = landmarks[PoseLandmark.LEFT_KNEE]
-    landmarks_inverted[PoseLandmark.LEFT_ANKLE] = landmarks[PoseLandmark.RIGHT_ANKLE]
-    landmarks_inverted[PoseLandmark.RIGHT_ANKLE] = landmarks[PoseLandmark.LEFT_ANKLE]
-    landmarks_inverted[PoseLandmark.LEFT_FOOT_INDEX] = landmarks[PoseLandmark.RIGHT_FOOT_INDEX]
-    landmarks_inverted[PoseLandmark.RIGHT_FOOT_INDEX] = landmarks[PoseLandmark.LEFT_FOOT_INDEX]
-
-    return landmarks_inverted
-
-
 def get_feature_from_joints_triplet(landmarks, triplet, degrees=False, normalize=True):
     a = Point3d.from_landmark(landmarks[PoseLandmark[triplet[0]]])
     b = Point3d.from_landmark(landmarks[PoseLandmark[triplet[1]]])
@@ -232,9 +209,6 @@ def load_features(base_path: str):
         img_path = os.path.join(imgs_path, img_file)
         landmarks1, landmarks2 = (get_landmarks(img_path),
                                   get_landmarks(img_path, mirror=True))
-        # landmarks3 = invert_landmarks(landmarks1)
-        # landmarks4 = invert_landmarks(landmarks2)
-        # landmarks = [landmarks1, landmarks2, landmarks3, landmarks4]
         landmarks = [landmarks1, landmarks2]
 
         for landmark in landmarks:
