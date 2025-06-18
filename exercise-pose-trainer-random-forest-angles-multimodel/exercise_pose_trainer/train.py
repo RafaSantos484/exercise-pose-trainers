@@ -28,7 +28,7 @@ def main():
     X_classes, y_classes, classes_features = load_features(base_path)
     print("Loaded features")
 
-    models_dict = {"models": {}, "classes_features": classes_features}
+    models_dict = {}
     classes = list(classes_features.keys())
     for c in classes:
         X = np.array(X_classes[c])
@@ -56,17 +56,18 @@ def main():
         report = classification_report(
             y_test, y_pred, target_names=model_classes, digits=4)
         cm = confusion_matrix(y_test, y_pred)
-        models_dict["models"][c] = {
+        models_dict[c] = {
             "model": best_model,
             "params": params,
             "report": report,
             "confusion_matrix": cm,
+            "features": classes_features[c]
         }
 
     for c in classes:
         print(f"Classification Report for {c} model(Test Set):")
-        print(models_dict["models"][c]["report"])
-        print(f"params: {models_dict['models'][c]['params']}\n")
+        print(models_dict[c]["report"])
+        print(f"params: {models_dict[c]['params']}\n")
 
     model_name = get_basename(base_path)
     with open(f"{model_name}_model.pkl", "wb") as f:
@@ -75,7 +76,7 @@ def main():
     if args.plot:
         for c in classes:
             plot_history(c,
-                         models_dict["models"][c]["confusion_matrix"],
-                         models_dict["models"][c]["model"].classes_)
+                         models_dict[c]["confusion_matrix"],
+                         models_dict[c]["model"].classes_)
         plt.tight_layout()
         plt.show()

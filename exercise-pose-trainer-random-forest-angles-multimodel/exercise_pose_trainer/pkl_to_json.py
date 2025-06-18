@@ -13,12 +13,10 @@ def main():
     with open(args.model_path, "rb") as f:
         models_dict = pickle.load(f)
 
-    classes_features = models_dict["classes_features"]
-    classes = list(classes_features.keys())
-    for c in classes:
-        model: RandomForestClassifier = models_dict["models"][c]["model"]
-        params = models_dict["models"][c]["params"]
-        forest_data = []
+    for classname, model_dict in models_dict.items():
+        model: RandomForestClassifier = model_dict["model"]
+        params = model_dict["params"]
+        forest = []
         for estimator in model.estimators_:
             tree = estimator.tree_
             tree_data = {
@@ -28,12 +26,14 @@ def main():
                 "threshold": tree.threshold.tolist(),
                 "value": tree.value.squeeze().tolist()  # shape (n_nodes, n_classes)
             }
-            forest_data.append(tree_data)
+            forest.append(tree_data)
+
         # save as json
         model_dict = {
             "params": params,
+            "features": model_dict["features"],
             "classes": model.classes_.tolist(),
-            "forest": forest_data
+            "forest": forest
         }
-        with open(f"{c}_model.json", "w") as f:
+        with open(f"{classname}_model.json", "w") as f:
             json.dump(model_dict, f)
