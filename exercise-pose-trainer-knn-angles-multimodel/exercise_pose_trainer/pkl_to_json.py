@@ -11,19 +11,18 @@ def main():
     args = parser.parse_args()
 
     with open(args.model_path, "rb") as f:
-        models_dict = pickle.load(f)
+        models_dict: dict = pickle.load(f)
 
-    classes_features = models_dict["classes_features"]
-    classes = list(classes_features.keys())
-    for c in classes:
-        model: KNeighborsClassifier = models_dict["models"][c]["model"]
-        params = models_dict["models"][c]["params"]
-        # save as json
-        model_dict = {
-            "params": params,
+    for c, model_dict in models_dict.items():
+        model: KNeighborsClassifier = model_dict["model"]
+        model_json = {
+            "params": model_dict["params"],
             "classes": model.classes_.tolist(),
-            "X": model._fit_X.tolist(),
-            "y": model._y.tolist(),
+            "features": model_dict["features"],
+            "model_data": {
+                "X": model._fit_X.tolist(),
+                "y": model._y.tolist(),
+            }
         }
         with open(f"{c}_model.json", "w") as f:
-            json.dump(model_dict, f)
+            json.dump(model_json, f)
