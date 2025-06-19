@@ -37,12 +37,14 @@ def main():
             X, y, test_size=0.3, random_state=seed)
 
         print(f"Training {c} model...")
+        # For p=1, minkowski = manhattan
+        # For p=2, minkowski = euclidean
         param_grid = {
-            "C": [0.001, 0.01, 0.1, 1, 10, 30],
+            "C": [1e-4, 1e-2, 0.1, 1, 10, 20, 50, 100],
             "fit_intercept": [True, False],
             "penalty": [None, "l1", "l2", "elasticnet"],
             "solver": ["lbfgs", "liblinear", "newton-cg", "newton-cholesky", "sag", "saga"],
-            "max_iter": [100, 500, 700, 1000, 1500, 2000]
+            "max_iter": [3, 5, 10, 30, 50, 80, 100]
         }
         model = LogisticRegression()
         grid_search = GridSearchCV(model, param_grid, n_jobs=-1)
@@ -50,6 +52,7 @@ def main():
         best_model = grid_search.best_estimator_
         model_classes = best_model.classes_
         params = grid_search.best_params_
+        params["train_test_split_seed"] = seed
 
         y_pred = best_model.predict(X_test)
         report = classification_report(

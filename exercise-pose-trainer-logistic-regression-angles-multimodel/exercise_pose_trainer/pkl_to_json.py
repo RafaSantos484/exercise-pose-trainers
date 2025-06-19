@@ -11,21 +11,18 @@ def main():
     args = parser.parse_args()
 
     with open(args.model_path, "rb") as f:
-        models_dict = pickle.load(f)
+        models_dict: dict = pickle.load(f)
 
-    for classname, model_dict in models_dict.items():
+    for c, model_dict in models_dict.items():
         model: LogisticRegression = model_dict["model"]
-        params = model_dict["params"]
-
-        # save as json
-        model_dict = {
-            "params": params,
-            "features": model_dict["features"],
+        model_json = {
+            "params": model_dict["params"],
             "classes": model.classes_.tolist(),
+            "features": model_dict["features"],
             "model_data": {
                 "coef": model.coef_.tolist(),
                 "intercept": model.intercept_.tolist()
             }
         }
-        with open(f"{classname}_model.json", "w") as f:
-            json.dump(model_dict, f)
+        with open(f"{c}_model.json", "w") as f:
+            json.dump(model_json, f)
