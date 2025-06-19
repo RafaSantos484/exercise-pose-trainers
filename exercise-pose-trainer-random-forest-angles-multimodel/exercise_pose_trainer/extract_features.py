@@ -174,8 +174,12 @@ def get_feature_from_joints_triplet(landmarks, triplet, degrees=False, normalize
     return angle
 
 
-def extract_features(landmarks, joints: list[str]):
-    triplets = list(combinations(joints, 3))
+def extract_features(landmarks, features: list[str] | list[list[str]]):
+    if isinstance(features[0], str):
+        triplets = list(combinations(features, 3))
+    else:
+        triplets = features
+
     angles = []
     for triplet in triplets:
         angles.append(get_feature_from_joints_triplet(landmarks, triplet))
@@ -216,11 +220,11 @@ def load_features(base_path: str):
                 for c in classes:
                     if len(img_labels) == 0:
                         features[c].append(extract_features(
-                            landmark, classes_features[c]["points"]))
+                            landmark, classes_features[c]["angles"]))
                         labels[c].append("correct")
                     elif c == "full_body" or c in img_labels:
                         features[c].append(extract_features(
-                            landmark, classes_features[c]["points"]))
+                            landmark, classes_features[c]["angles"]))
                         labels[c].append("incorrect")
 
     return features, labels, classes_features

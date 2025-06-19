@@ -3,7 +3,7 @@ import argparse
 import pickle
 import numpy as np
 
-from .utils import get_basename, is_img_file
+from .utils import is_img_file
 from .extract_features import extract_features, get_landmarks
 
 

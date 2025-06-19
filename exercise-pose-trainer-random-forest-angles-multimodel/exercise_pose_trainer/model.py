@@ -21,18 +21,16 @@ def main():
     args = parser.parse_args()
 
     with open(args.model_path, "rb") as f:
-        models_dict = pickle.load(f)
+        models_dict: dict = pickle.load(f)
 
-    classes_features = models_dict["classes_features"]
-    classes = list(classes_features.keys())
-    for c in classes:
-        model = models_dict["models"][c]["model"]
+    for c, model_dict in models_dict.items():
+        model = model_dict["model"]
         print(
             f"Classification Report for {c} model (Test Set):")
-        print(models_dict["models"][c]["report"])
-        print(f"params: {models_dict['models'][c]['params']}\n")
+        print(model_dict["report"])
+        print(f"params: {model_dict['params']}\n")
         plot_history(c,
-                     models_dict["models"][c]["confusion_matrix"],
+                     model_dict["confusion_matrix"],
                      model.classes_)
     plt.tight_layout()
     plt.show()

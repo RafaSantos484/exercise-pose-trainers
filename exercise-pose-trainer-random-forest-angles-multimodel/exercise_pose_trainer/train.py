@@ -37,10 +37,12 @@ def main():
             X, y, test_size=0.3, random_state=seed)
 
         print(f"Training {c} model...")
+        # For p=1, minkowski = manhattan
+        # For p=2, minkowski = euclidean
         param_grid = {
             "n_estimators": [2, 5, 10, 30, 50, 80, 100],
             "criterion": ["gini", "entropy", "log_loss"],
-            "max_depth": [None, 20, 40, 60, 80],
+            "max_depth": [None, 20, 40, 60, 80, 100, 150, 200, 300],
             "min_samples_split": [2, 4, 6, 8],
             "min_samples_leaf": [1, 2, 3, 4],
             "bootstrap": [True, False]
@@ -51,6 +53,7 @@ def main():
         best_model = grid_search.best_estimator_
         model_classes = best_model.classes_
         params = grid_search.best_params_
+        params["train_test_split_seed"] = seed
 
         y_pred = best_model.predict(X_test)
         report = classification_report(
