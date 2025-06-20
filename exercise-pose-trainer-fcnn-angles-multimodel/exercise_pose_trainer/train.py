@@ -32,20 +32,26 @@ def main():
     X_classes, y_classes, classes_features = load_features(base_path)
     print("Loaded features")
 
-    models_dict = {"models": {}, "classes_features": classes_features}
+    models_dict = {}
     classes = list(classes_features.keys())
     for c in classes:
         X = np.array(X_classes[c])
         y = np.array(y_classes[c])
+
+        label_encoder = LabelEncoder()
+        y_encoded = label_encoder.fit_transform(y)
+        y_onehot = to_categorical(y_encoded)
         X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.3, random_state=seed)
+            X, y_onehot, test_size=0.3, random_state=seed)
 
         input_shape = X.shape[1:]
-        model = get_model(input_shape, num_classes=2)
+        labels = label_encoder.classes_
+        num_classes = len(labels)
+        model = get_model(input_shape, num_classes=num_classes)
         print(f"Training {c} model...")
         early_stopping_callback = EarlyStopping(
-            patience=500, restore_best_weights=True)
-        reduce_lr_callback = ReduceLROnPlateau(patience=100)
+            patience=200, restore_best_weights=True)
+        reduce_lr_callback = ReduceLROnPlateau(patience=50)
         history = model.fit(X_train, y_train,
                             epochs=10000,
                             # epochs=100,
@@ -59,29 +65,34 @@ def main():
         y_pred_labels = np.argmax(y_pred, axis=1)
 
         report = classification_report(
-            y_test_labels, y_pred_labels, target_names=["incorrect", "correct"], digits=4)
+            y_test_labels, y_pred_labels, target_names=labels, digits=4)
         cm = confusion_matrix(y_test_labels, y_pred_labels)
-        models_dict["models"][c] = {
+        models_dict[c] = {
             "model_json": model.to_json(),
             "model_weights": model.get_weights(),
             "report": report,
             "confusion_matrix": cm,
-            "history": history
+            "history": history,
+            "classes": labels,
+            "features": classes_features[c],
+            "train_test_split_seed": seed
         }
 
-    for c in classes:
-        num_epochs = len(models_dict["models"][c]["history"].history["loss"])
+    for c, model_dict in models_dict.items():
+        num_epochs = len(model_dict["history"].history["loss"])
         print(
             f"Classification Report for {c} model after {num_epochs} epochs (Test Set):")
-        print(models_dict["models"][c]["report"])
+        print(model_dict["report"])
 
     model_name = get_basename(base_path)
     with open(f"{model_name}_model.pkl", "wb") as f:
         pickle.dump(models_dict, f)
 
     if args.plot:
-        for c in classes:
-            plot_history(c, models_dict["models"][c]["history"],
-                         models_dict["models"][c]["confusion_matrix"], ["incorrect", "correct"])  # type: ignore
+        for c, model_dict in models_dict.items():
+            plot_history(c,
+                         model_dict["history"],
+                         model_dict["confusion_matrix"],
+                         classes)
         plt.tight_layout()
         plt.show()

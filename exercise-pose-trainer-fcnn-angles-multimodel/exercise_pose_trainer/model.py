@@ -69,14 +69,14 @@ def main():
     with open(args.model_path, "rb") as f:
         models_dict = pickle.load(f)
 
-    classes_points = models_dict["classes_points"]
-    classes = list(classes_points.keys())
-    for c in classes:
-        num_epochs = len(models_dict["models"][c]["history"].history["loss"])
+    for c, model_dict in models_dict.items():
+        print(model_dict["classes"])
+        num_epochs = len(model_dict["history"].history["loss"])
         print(
             f"Classification Report for {c} model after {num_epochs} epochs (Test Set):")
-        print(models_dict["models"][c]["report"])
-        plot_history(c, models_dict["models"][c]["history"],
-                     models_dict["models"][c]["confusion_matrix"], ["incorrect", "correct"])
+        print(model_dict["report"])
+        plot_history(c,
+                     model_dict["history"], model_dict["confusion_matrix"],
+                     model_dict["classes"])
     plt.tight_layout()
     plt.show()
