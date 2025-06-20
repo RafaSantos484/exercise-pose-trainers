@@ -3,9 +3,9 @@ import pickle
 
 from matplotlib import pyplot as plt
 import numpy as np
-from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.svm import SVC
 
 from .model import plot_history
 from .extract_features import load_features
@@ -41,8 +41,8 @@ def main():
             "C": [0.1, 1, 10, 30, 50, 80, 100],
             "kernel": ["linear", "poly", "rbf", "sigmoid"],
             "gamma": ["scale", "auto"],
-            "degree": [0, 1, 2, 3, 4],  # Only used for "poly"
-            "coef0": [0, 0.1, 1, 5, 10],  # Only used for "poly" and "sigmoid"
+            # "degree": [0, 1, 2, 3, 4, 5],  # Only used for "poly"
+            # "coef0": [0, 1, 5, 10, 50, 100, 150, 200],  # Only used for "poly" and "sigmoid"
             "shrinking": [True, False],
             "probability": [True, False],
             "decision_function_shape": ["ovo", "ovr"],
@@ -53,6 +53,7 @@ def main():
         best_model = grid_search.best_estimator_
         model_classes = best_model.classes_
         params = grid_search.best_params_
+        params["train_test_split_seed"] = seed
 
         y_pred = best_model.predict(X_test)
         report = classification_report(

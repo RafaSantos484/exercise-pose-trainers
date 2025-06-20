@@ -24,9 +24,10 @@ def main():
                 "support_vectors": model.support_vectors_.tolist(),
                 "dual_coef": model.dual_coef_.tolist(),
                 "intercept": model.intercept_.tolist(),
-                "gamma": model._gamma,  # pode ser float ou 'scale'/'auto'
-                "coef0": model.coef0,
-                "degree": model.degree,
+                "gamma": float(model._gamma),
+                "coef0": float(model.coef0),
+                "degree": int(model.degree),
+                "n_support": model.n_support_.tolist()
             }
         }
 
