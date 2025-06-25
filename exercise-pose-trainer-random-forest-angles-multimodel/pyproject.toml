@@ -9,13 +9,15 @@ readme = "README.md"
 python = "^3.10"
 mediapipe = "^0.10.21"
 scikit-learn = "^1.6.1"
+onnx = "^1.18.0"
+skl2onnx = "^1.19.1"
 
 [tool.poetry.scripts]
 train = "exercise_pose_trainer.train:main"
 rename_files = "exercise_pose_trainer.rename_files:main"
 test = "exercise_pose_trainer.test:main"
 report = "exercise_pose_trainer.model:main"
-pkl_to_json = "exercise_pose_trainer.pkl_to_json:main"
+export_onnx = "exercise_pose_trainer.export_onnx:main"
 
 [build-system]
 requires = ["poetry-core"]
