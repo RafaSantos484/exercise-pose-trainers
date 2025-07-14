@@ -37,15 +37,12 @@ def main():
             X, y, test_size=0.3, random_state=seed)
 
         print(f"Training {c} model...")
-        # For p=1, minkowski = manhattan
-        # For p=2, minkowski = euclidean
         param_grid = {
-            "n_estimators": [2, 5, 10, 30, 50, 80, 100],
+            "n_estimators": [10, 50, 100, 200],
             "criterion": ["gini", "entropy", "log_loss"],
-            "max_depth": [None, 20, 40, 60, 80, 100, 150, 200, 300],
-            "min_samples_split": [2, 4, 6, 8],
-            "min_samples_leaf": [1, 2, 3, 4],
-            "bootstrap": [True, False]
+            "max_depth": [None, 10, 20, 50],
+            "min_samples_split": [2, 5, 10],
+            "min_samples_leaf": [1, 2, 5, 10]
         }
         model = RandomForestClassifier()
         grid_search = GridSearchCV(model, param_grid, n_jobs=-1)
