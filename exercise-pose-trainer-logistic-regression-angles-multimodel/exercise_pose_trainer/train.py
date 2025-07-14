@@ -37,14 +37,11 @@ def main():
             X, y, test_size=0.3, random_state=seed)
 
         print(f"Training {c} model...")
-        # For p=1, minkowski = manhattan
-        # For p=2, minkowski = euclidean
         param_grid = {
-            "C": [1e-4, 1e-2, 0.1, 1, 10, 20, 50, 100],
-            "fit_intercept": [True, False],
             "penalty": [None, "l1", "l2", "elasticnet"],
+            "C": [0.01, 0.1, 1, 10, 50, 100],
             "solver": ["lbfgs", "liblinear", "newton-cg", "newton-cholesky", "sag", "saga"],
-            "max_iter": [3, 5, 10, 30, 50, 80, 100]
+            "max_iter": [None, 10, 50, 100, 200]
         }
         model = LogisticRegression()
         grid_search = GridSearchCV(model, param_grid, n_jobs=-1)
