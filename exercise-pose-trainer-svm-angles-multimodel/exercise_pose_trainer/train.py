@@ -38,14 +38,10 @@ def main():
 
         print(f"Training {c} model...")
         param_grid = {
-            "C": [0.1, 1, 10, 30, 50, 80, 100],
+            "C": [0.01, 0.1, 1, 10, 50],
             "kernel": ["linear", "poly", "rbf", "sigmoid"],
-            "gamma": ["scale", "auto"],
-            # "degree": [0, 1, 2, 3, 4, 5],  # Only used for "poly"
-            # "coef0": [0, 1, 5, 10, 50, 100, 150, 200],  # Only used for "poly" and "sigmoid"
-            "shrinking": [True, False],
-            "probability": [True, False],
-            "decision_function_shape": ["ovo", "ovr"],
+            "degree": [2, 3, 4, 5, 10, 20, 50],
+            "gamma": ["scale", "auto"]
         }
         model = SVC()
         grid_search = GridSearchCV(model, param_grid, n_jobs=-1)
